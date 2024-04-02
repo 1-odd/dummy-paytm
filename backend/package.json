@@ -4,7 +4,8 @@
   "description": "This is the backend part of our dummy project paytm",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
   },
   "author": "Ritik",
   "license": "ISC",
