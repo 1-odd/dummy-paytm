@@ -57,6 +57,7 @@ userRouter.post("/signup", alreadyExist, async (req, res) => {
   // validate the body of request using ZOD schema
 
   const correctData = signupBody.safeParse(req.body);
+ 
 
   if (!correctData.success) {
     return res.status(411).json({
@@ -180,15 +181,24 @@ userRouter.put('/updateUser', authMiddleware , async (req, res) => {
 
 
 
-userRouter.get("/bulk", async (req, res) => {
+userRouter.get("/bulk",authMiddleware, async (req, res) => {
   try {
       const filter = req.query.filter || "";
-      
-      // Search users based on first name or last name containing the provided filter string
+
+      // Get the ID of the current user from the request
+      const currentUserId = req.userId; // Assuming you have a middleware to extract userId from request
+     
+
+      // Search for users excluding the current user based on first name or last name containing the provided filter string
       const users = await User.find({
-          $or: [
-              { firstName: { $regex: filter, $options: "i" } }, // Case-insensitive search for first name
-              { lastName: { $regex: filter, $options: "i" } }   // Case-insensitive search for last name
+          $and: [
+              { _id: { $ne: currentUserId } }, // Exclude the current user
+              {
+                  $or: [
+                      { firstName: { $regex: filter, $options: "i" } }, // Case-insensitive search for first name
+                      { lastName: { $regex: filter, $options: "i" } } // Case-insensitive search for last name
+                  ]
+              }
           ]
       });
 
@@ -199,13 +209,14 @@ userRouter.get("/bulk", async (req, res) => {
           lastName: user.lastName,
           _id: user._id
       }));
-      
+
       res.json({ users: simplifiedUsers });
   } catch (error) {
       console.error("Error fetching bulk users:", error);
       res.status(500).json({ message: "Server error" });
   }
 });
+
 
   
 
